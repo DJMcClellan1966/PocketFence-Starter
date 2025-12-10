@@ -1,0 +1,23 @@
+name: pocketfence
+description: Parental control via hotspot + DNS.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  wifi_iot: ^0.3.23  # For hotspot control (Android)
+  shared_preferences: ^2.2.2  # Local storage
+  http: ^1.1.0  # For NextDNS API calls
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
