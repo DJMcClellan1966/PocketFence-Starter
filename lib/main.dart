@@ -1,139 +1,193 @@
-import 'dart:io'; // For Platform.isIOS
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // For MethodChannels if needed
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart'; // For Settings deep link
+import 'dart:io';
 
-void main() => runApp(PocketFenceApp());
+import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
+
+const MethodChannel _channel = MethodChannel('pocketfence.hotspot');
+
+Future<void> main() async {
+	WidgetsFlutterBinding.ensureInitialized();
+	runApp(const PocketFenceApp());
+}
 
 class PocketFenceApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'PocketFence',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: ParentDashboard(),
-    );
-  }
+	const PocketFenceApp({super.key});
+
+	@override
+	Widget build(BuildContext context) => const MyApp();
 }
 
-class ParentDashboard extends StatefulWidget {
-  @override
-  _ParentDashboardState createState() => _ParentDashboardState();
+class MyApp extends StatefulWidget {
+	const MyApp({super.key});
+
+	@override
+	State<MyApp> createState() => _MyAppState();
 }
 
-class _ParentDashboardState extends State<ParentDashboard> {
-  bool _hotspotOn = false;
-  String _dnsStatus = 'Not Set';
-  bool _isIOS = Platform.isIOS;
-  int _screenTimeLimit = 120; // minutes
+class _MyAppState extends State<MyApp> {
+	final TextEditingController _ssidController = TextEditingController();
+	bool _blockOthers = true;
+	bool _hotspotRunning = false;
+	String _status = 'idle';
 
-  // Your NextDNS IPs
-  final String primaryDNS = "45.90.28.116";
-  final String secondaryDNS = "45.90.30.116";
+	@override
+	void initState() {
+		super.initState();
+		WidgetsBinding.instance.addPostFrameCallback((_) => _promptPermissionIfNeeded());
+		_loadSaved();
+	}
 
-  @override
-  void initState() {
-    super.initState();
-    _loadPrefs();
-    if (_isIOS) {
-      _checkHotspotStatus(); // Simulate check via native if added
-    }
-  }
+	Future<void> _loadSaved() async {
+		final prefs = await SharedPreferences.getInstance();
+		_ssidController.text = prefs.getString('hotspot_ssid') ?? '';
+		_blockOthers = prefs.getBool('hotspot_block') ?? true;
+		if (mounted) setState(() {});
+	}
 
-  Future<void> _loadPrefs() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _screenTimeLimit = prefs.getInt('screenTimeLimit') ?? 120;
-    });
-  }
+	Future<void> _promptPermissionIfNeeded() async {
+		if (Platform.isAndroid || Platform.isIOS) {
+			final status = await Permission.location.status;
+			if (!status.isGranted) {
+				if (!mounted) return;
+				await showDialog<void>(
+					context: context,
+					builder: (context) => AlertDialog(
+						title: const Text('Location permission required'),
+						content: const Text('This app needs location permission to start the hotspot on mobile devices.'),
+						actions: [
+							TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+							TextButton(
+								onPressed: () async {
+									Navigator.of(context).pop();
+									await Permission.location.request();
+									if (!mounted) return;
+								},
+								child: const Text('Allow'),
+							),
+						],
+					),
+				);
+			}
+		}
+	}
 
-  // iOS: Open Settings for manual hotspot toggle
-  Future<void> _toggleHotspot(bool on) async {
-    setState(() => _hotspotOn = on);
-    if (_isIOS) {
-      // Deep link to Personal Hotspot settings
-      final uri = Uri.parse('App-Prefs:Internet Tethering'); // iOS 10+ hotspot URL
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-        _dnsStatus =
-            'Settings opened! Go to Wi-Fi > [Your Hotspot Name] > DNS > Manual > Enter:\nPrimary: $primaryDNS\nSecondary: $secondaryDNS';
-      } else {
-        // Fallback: Open general Settings
-        await launchUrl(Uri.parse('app-settings:'), mode: LaunchMode.externalApplication);
-        _dnsStatus =
-            'Open Settings > Personal Hotspot > Allow Others > Then go to Wi-Fi > [Hotspot Name] > DNS > Manual > Add:\n$primaryDNS and $secondaryDNS';
-      }
-    } else {
-      // Android: Keep original logic (add wifi_iot back if needed)
-      // await WiFiForIoTPlugin.setEnabled(on);
-      _dnsStatus = on ? 'NextDNS Active ($primaryDNS / $secondaryDNS)' : 'Off';
-    }
-    setState(() {});
-  }
+	Future<void> _startHotspot() async {
+		setState(() => _status = 'starting');
 
-  // iOS VPN Fallback for DNS (expand with native channel)
-  Future<void> _enableVPNSafeDNS() async {
-    if (_isIOS) {
-      // Native call: Setup NETunnelProviderManager with NextDNS
-      // Example channel invoke (implement in ios/Runner/AppDelegate.swift)
-      const channel = MethodChannel('pocketfence.vpn');
-      try {
-        final bool success = await channel.invokeMethod('setupVPN');
-        if (success) {
-          _dnsStatus = 'VPN DNS Filter Active (Using $primaryDNS / $secondaryDNS)';
-        }
-      } on PlatformException catch (e) {
-        _dnsStatus = 'VPN Setup Failed: $e';
-      }
-    }
-  }
+		if (Platform.isAndroid || Platform.isIOS) {
+			try {
+				// Ensure location permission is granted on Android before starting hotspot
+				if (Platform.isAndroid) {
+					final locStatus = await Permission.location.status;
+					if (!locStatus.isGranted) {
+						final req = await Permission.location.request();
+						if (!req.isGranted) {
+							if (!mounted) return;
+							setState(() => _status = 'permission required');
+							return;
+						}
+					}
+					// On Android 13+ the Nearby Devices / Bluetooth permissions may be required
+					// Request common bluetooth/nearby permissions if available.
+					try {
+						final scan = await Permission.bluetoothScan.status;
+						if (!scan.isGranted) {
+							await Permission.bluetoothScan.request();
+						}
+					} catch (_) {}
+					try {
+						final connect = await Permission.bluetoothConnect.status;
+						if (!connect.isGranted) {
+							await Permission.bluetoothConnect.request();
+						}
+					} catch (_) {}
+				}
+				final prefs = await SharedPreferences.getInstance();
+				await prefs.setString('hotspot_ssid', _ssidController.text);
+				await prefs.setBool('hotspot_block', _blockOthers);
 
-  Future<void> _setLimit(int limit) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('screenTimeLimit', limit);
-    setState(() => _screenTimeLimit = limit);
-    // Sync to NextDNS
-    await http.post(Uri.parse('https://dns.nextdns.io/update'), body: {'limit': limit.toString()});
-  }
+				await _channel.invokeMethod<Map>('startHotspot', {
+					'ssid': _ssidController.text,
+					'blockOthers': _blockOthers,
+				});
 
-  void _checkHotspotStatus() {
-    // Placeholder: Use private API detection if jailbroken, or prompt user
-    // For now, assume off and guide
-    setState(() => _dnsStatus = 'Tap button to enable hotspot and set DNS');
-  }
+				if (!mounted) return;
+				setState(() {
+					_hotspotRunning = true;
+					_status = 'running';
+				});
+			} on PlatformException catch (e) {
+				if (!mounted) return;
+				setState(() => _status = 'error: ${e.message}');
+			}
+		} else {
+			setState(() => _status = 'unsupported platform');
+		}
+	}
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('PocketFence Dashboard')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (_isIOS) Text('iOS Mode: Guided Setup + VPN Fallback', style: TextStyle(fontSize: 16, color: Colors.orange)),
-            Text('Hotspot: ${_hotspotOn ? "ON" : "OFF"}', style: TextStyle(fontSize: 20)),
-            Switch(value: _hotspotOn, onChanged: _toggleHotspot),
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(_dnsStatus, textAlign: TextAlign.center, style: TextStyle(fontSize: 14)),
-            ),
-            Text('Screen Time: $_screenTimeLimit min'),
-            Slider(value: _screenTimeLimit.toDouble(), min: 30, max: 240, onChanged: (v) => _setLimit(v.toInt())),
-            ElevatedButton(
-              onPressed: () => _toggleHotspot(true),
-              child: Text('Start Safe Hotspot (iOS: Opens Settings)'),
-            ),
-            if (_isIOS)
-              ElevatedButton(
-                onPressed: _enableVPNSafeDNS,
-                child: Text('Enable VPN DNS Filter'),
-              ),
-            // Add logs, profiles here
-          ],
-        ),
-      ),
-    );
-  }
+	Future<void> _stopHotspot() async {
+		setState(() => _status = 'stopping');
+		if (Platform.isAndroid || Platform.isIOS) {
+			try {
+				await _channel.invokeMethod('stopHotspot');
+				if (!mounted) return;
+				setState(() {
+					_hotspotRunning = false;
+					_status = 'stopped';
+				});
+			} on PlatformException catch (e) {
+				if (!mounted) return;
+				setState(() => _status = 'error: ${e.message}');
+			}
+		} else {
+			setState(() => _status = 'unsupported platform');
+		}
+	}
+
+	@override
+	Widget build(BuildContext context) {
+		return MaterialApp(
+			title: 'PocketFence',
+			home: Scaffold(
+				appBar: AppBar(title: const Text('PocketFence Hotspot')),
+				body: SafeArea(
+					child: Padding(
+						padding: const EdgeInsets.all(16.0),
+						child: Column(
+							crossAxisAlignment: CrossAxisAlignment.start,
+							children: [
+								const Text('Hotspot SSID:'),
+								TextField(controller: _ssidController),
+								const SizedBox(height: 12),
+								Row(
+									children: [
+										const Text('Block other Wi‑Fi'),
+										Switch(value: _blockOthers, onChanged: (v) => setState(() => _blockOthers = v)),
+									],
+								),
+								const SizedBox(height: 12),
+								Row(
+									children: [
+										ElevatedButton(onPressed: _hotspotRunning ? null : _startHotspot, child: const Text('Start')),
+										const SizedBox(width: 12),
+										ElevatedButton(onPressed: _hotspotRunning ? _stopHotspot : null, child: const Text('Stop')),
+									],
+								),
+								const SizedBox(height: 20),
+								Text('Status: $_status'),
+								const SizedBox(height: 12),
+								if (!Platform.isAndroid && !Platform.isIOS)
+									const Padding(
+										padding: EdgeInsets.only(top: 12.0),
+										child: Text('Hotspot control is available only on Android and iOS.'),
+									),
+							],
+						),
+					),
+				),
+			),
+		);
+	}
 }

@@ -13,13 +13,20 @@ dependencies:
   shared_preferences: ^2.2.2  # Local storage
   http: ^1.1.0  # NextDNS API
   url_launcher: ^6.2.2  # For opening Settings (iOS/Android)
+  permission_handler: ^12.0.1
   # iOS VPN/DNS: Use a package like 'flutter_vpn' or implement via channels
   # For now, simulate with url_launcher for Settings
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
+
+dependency_overrides:
+  characters: ^1.4.1
+  material_color_utilities: ^0.13.0
+  matcher: ^0.12.18
+  test_api: ^0.7.8
 
 flutter:
   uses-material-design: true

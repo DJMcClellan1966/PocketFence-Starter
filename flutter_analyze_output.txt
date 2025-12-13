@@ -1,0 +1,95 @@
+﻿Analyzing github...                                             
+
+   info - Don't use 'BuildContext's across async gaps - lib\main.dart:55:11 - use_build_context_synchronously
+  error - Directives must appear before any declarations - lib\main.dart:168:1 - directive_after_declaration
+  error - Directives must appear before any declarations - lib\main.dart:170:1 - directive_after_declaration
+  error - Directives must appear before any declarations - lib\main.dart:171:1 - directive_after_declaration
+  error - Directives must appear before any declarations - lib\main.dart:172:1 - directive_after_declaration
+  error - Directives must appear before any declarations - lib\main.dart:173:1 - directive_after_declaration
+warning - The declaration '_channel' isn't referenced - lib\main.dart:175:21 - unused_element
+  error - The name '_channel' is already defined - lib\main.dart:175:21 - duplicate_definition
+  error - The name 'main' is already defined - lib\main.dart:177:14 - duplicate_definition
+  error - The name 'MyApp' is already defined - lib\main.dart:182:7 - duplicate_definition
+   info - Parameter 'key' could be a super parameter - lib\main.dart:183:9 - use_super_parameters
+warning - The declaration '_MyAppState' isn't referenced - lib\main.dart:189:7 - unused_element
+  error - The name '_MyAppState' is already defined - lib\main.dart:189:7 - duplicate_definition
+   info - Don't use 'BuildContext's across async gaps - lib\main.dart:214:11 - use_build_context_synchronously
+  error - Directives must appear before any declarations - lib\main.dart:322:1 - directive_after_declaration
+  error - Directives must appear before any declarations - lib\main.dart:323:1 - directive_after_declaration
+  error - Directives must appear before any declarations - lib\main.dart:325:1 - directive_after_declaration
+  error - Directives must appear before any declarations - lib\main.dart:326:1 - directive_after_declaration
+  error - Directives must appear before any declarations - lib\main.dart:327:1 - directive_after_declaration
+  error - Directives must appear before any declarations - lib\main.dart:328:1 - directive_after_declaration
+  error - Directives must appear before any declarations - lib\main.dart:329:1 - directive_after_declaration
+  error - The name 'main' is already defined - lib\main.dart:333:14 - duplicate_definition
+  error - The name 'MyApp' is already defined - lib\main.dart:338:7 - duplicate_definition
+   info - Parameter 'key' could be a super parameter - lib\main.dart:339:9 - use_super_parameters
+warning - The declaration '_MyAppState' isn't referenced - lib\main.dart:345:7 - unused_element
+  error - Missing concrete implementation of 'abstract class State<T extends StatefulWidget> with Diagnosticable.build' - lib\main.dart:345:7 - non_abstract_class_inherits_abstract_member
+  error - The name '_MyAppState' is already defined - lib\main.dart:345:7 - duplicate_definition
+warning - The value of the field '_blockOthers' isn't used - lib\main.dart:347:8 - unused_field
+   info - The private field _hotspotRunning could be 'final' - lib\main.dart:348:8 - prefer_final_fields
+warning - The value of the field '_hotspotRunning' isn't used - lib\main.dart:348:8 - unused_field
+   info - The private field _status could be 'final' - lib\main.dart:349:10 - prefer_final_fields
+warning - The value of the field '_status' isn't used - lib\main.dart:349:10 - unused_field
+  error - The method '_promptPermissionIfNeeded' isn't defined for the type '_MyAppState' - lib\main.dart:354:57 - undefined_method
+  error - Expected to find ';' - lib\main.dart:362:5 - expected_token
+  error - Undefined name 'import' - lib\main.dart:362:5 - undefined_identifier
+  error - Expected to find ';' - lib\main.dart:363:5 - expected_token
+  error - Undefined name 'import' - lib\main.dart:363:5 - undefined_identifier
+  error - Expected to find ';' - lib\main.dart:365:5 - expected_token
+  error - Undefined name 'import' - lib\main.dart:365:5 - undefined_identifier
+  error - Expected to find ';' - lib\main.dart:366:5 - expected_token
+  error - Undefined name 'import' - lib\main.dart:366:5 - undefined_identifier
+  error - Expected to find ';' - lib\main.dart:367:5 - expected_token
+  error - Undefined name 'import' - lib\main.dart:367:5 - undefined_identifier
+  error - Expected to find ';' - lib\main.dart:368:5 - expected_token
+  error - Undefined name 'import' - lib\main.dart:368:5 - undefined_identifier
+  error - Expected to find ';' - lib\main.dart:369:5 - expected_token
+  error - Undefined name 'import' - lib\main.dart:369:5 - undefined_identifier
+warning - The value of the local variable 'channel' isn't used - lib\main.dart:371:11 - unused_local_variable
+warning - The declaration 'main' isn't referenced - lib\main.dart:373:18 - unused_element
+  error - 'class' can't be used as an identifier because it's a keyword - lib\main.dart:378:5 - expected_identifier_but_got_keyword
+  error - Expected a statement - lib\main.dart:378:5 - missing_statement
+  error - Expected to find ';' - lib\main.dart:378:5 - expected_token
+  error - Undefined name 'class' - lib\main.dart:378:5 - undefined_identifier
+  error - Expected to find ';' - lib\main.dart:378:11 - expected_token
+  error - 'extends' can't be used as an identifier because it's a keyword - lib\main.dart:378:17 - expected_identifier_but_got_keyword
+  error - Expected a statement - lib\main.dart:378:17 - missing_statement
+  error - Expected to find ';' - lib\main.dart:378:17 - expected_token
+  error - Undefined name 'extends' - lib\main.dart:378:17 - undefined_identifier
+  error - Expected to find ';' - lib\main.dart:378:25 - expected_token
+  error - Too many positional arguments: 0 expected, but 1 found - lib\main.dart:379:19 - extra_positional_arguments_could_be_named
+  error - Conditions must have a static type of 'bool' - lib\main.dart:379:20 - non_bool_condition
+  error - In constant expressions, operands of this operator must be of type 'bool' - lib\main.dart:379:20 - const_eval_type_bool
+  error - Undefined name 'key' - lib\main.dart:379:25 - undefined_identifier
+  error - Expected an identifier - lib\main.dart:379:28 - missing_identifier
+  error - Expected to find ':' - lib\main.dart:379:28 - expected_token
+  error - Expected to find ';' - lib\main.dart:379:29 - expected_token
+  error - Expected an identifier - lib\main.dart:379:31 - missing_identifier
+  error - Unexpected text ':' - lib\main.dart:379:31 - unexpected_token
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\main.dart:379:33 - invocation_of_non_function_expression
+  error - Undefined name 'key' - lib\main.dart:379:44 - undefined_identifier
+warning - The declaration 'createState' isn't referenced - lib\main.dart:382:20 - unused_element
+  error - 'class' can't be used as an identifier because it's a keyword - lib\main.dart:385:5 - expected_identifier_but_got_keyword
+  error - Expected a statement - lib\main.dart:385:5 - missing_statement
+  error - Expected to find ';' - lib\main.dart:385:5 - expected_token
+  error - Undefined name 'class' - lib\main.dart:385:5 - undefined_identifier
+  error - Expected to find ';' - lib\main.dart:385:11 - expected_token
+  error - 'extends' can't be used as an identifier because it's a keyword - lib\main.dart:385:23 - expected_identifier_but_got_keyword
+  error - Expected a statement - lib\main.dart:385:23 - missing_statement
+  error - Expected to find ';' - lib\main.dart:385:23 - expected_token
+  error - Undefined name 'extends' - lib\main.dart:385:23 - undefined_identifier
+  error - The operator '<' isn't defined for the type 'Type' - lib\main.dart:385:36 - undefined_operator
+  error - A comparison expression can't be an operand of another comparison expression - lib\main.dart:385:42 - equality_cannot_be_equality_operand
+  error - Expected an identifier - lib\main.dart:386:7 - missing_identifier
+  error - Expected to find '}' - lib\main.dart:386:7 - expected_token
+  error - Expected to find ';' - lib\main.dart:559:1 - expected_token
+  error - Expected to find '}' - lib\main.dart:560:1 - expected_token
+   info - Parameter 'key' could be a super parameter - lib\main.tmp.dart:16:9 - use_super_parameters
+   info - Don't use 'BuildContext's across async gaps - lib\main.tmp.dart:47:11 - use_build_context_synchronously
+warning - Unused import: 'dart:math' - lib\main_mobile.dart:2:8 - unused_import
+warning - Unused import: 'package:url_launcher/url_launcher.dart' - lib\main_mobile.dart:7:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\main_mobile.dart:18:9 - use_super_parameters
+   info - Don't use 'BuildContext's across async gaps - lib\main_mobile.dart:49:11 - use_build_context_synchronously
+

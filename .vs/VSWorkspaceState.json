@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\.github",
+    "\\.github\\workflows",
+    "\\ios",
+    "\\ios\\Runner",
+    "\\lib"
+  ],
+  "SelectedNode": "\\ios\\AppDelegate.swift",
+  "PreviewInSolutionExplorer": false
+}

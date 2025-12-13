@@ -9,3 +9,5 @@
     </array>
   </dict>
 </array>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Location permission is required to create a local Wi-Fi hotspot.</string>
