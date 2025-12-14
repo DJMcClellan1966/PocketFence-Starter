@@ -61,8 +61,12 @@ class MainActivity : FlutterActivity() {
 
 		// If running on an emulator, skip the NEARBY_DEVICES runtime check (emulators often cannot grant it)
 		if (isProbablyEmulator()) {
-			Log.w("PocketFence", "Emulator detected — skipping NEARBY/BLUETOOTH runtime checks for testing")
-			startLocalOnlyHotspotInternal(requestedName, blockOthers, dnsServers, result)
+			Log.w("PocketFence", "Emulator detected — returning mocked hotspot result for testing")
+			val mock: MutableMap<String, Any> = HashMap()
+			mock["ssid"] = requestedName
+			mock["password"] = "emulator-test"
+			if (dnsServers != null) mock["dnsServers"] = dnsServers
+			Handler(Looper.getMainLooper()).post { result.success(mock) }
 			return
 		}
 
