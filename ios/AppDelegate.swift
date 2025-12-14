@@ -2,8 +2,9 @@ import Flutter
 import NetworkExtension
 import UIKit
 
-@UIApplicationMain
-@objc class AppDelegate: FlutterAppDelegate {
+// This file is preserved as a reference. The active AppDelegate is ios/Runner/AppDelegate.swift
+// The original AppDelegate entry annotation is commented out to avoid duplicate symbols.
+@objc class AppDelegate_Old: FlutterAppDelegate {
   /**
    iOS notes
    - iOS does not allow third-party apps to enable or rename the system "Personal Hotspot" programmatically.

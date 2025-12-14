@@ -1,4 +1,5 @@
 import Flutter
+import NetworkExtension
 import UIKit
 
 @main
@@ -7,9 +8,31 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    GeneratedPluginRegistrant.register(with: self)
+    guard let controller = window?.rootViewController as? FlutterViewController else {
+      return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
+    // VPN channel — sets up an on-demand DNS/VPN tunnel using NetworkExtension.
+    let vpnChannel = FlutterMethodChannel(name: "pocketfence.vpn", binaryMessenger: controller.binaryMessenger)
+
     // Device discovery channel: return simulated list on simulator or empty on device
-    let deviceChannel = FlutterMethodChannel(name: "pocketfence.devices", binaryMessenger: self as! FlutterBinaryMessenger)
+    let deviceChannel = FlutterMethodChannel(name: "pocketfence.devices", binaryMessenger: controller.binaryMessenger)
+
+    // Hotspot channel (UNIMPLEMENTED on iOS)
+    let hotspotChannel = FlutterMethodChannel(name: "pocketfence.hotspot", binaryMessenger: controller.binaryMessenger)
+
+    vpnChannel.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+      if call.method == "setupVPN" {
+        let args = call.arguments as? [String: Any]
+        let dnsServers = args? ["dnsServers"] as? [String]
+        self.setupDNSVPN(dnsServers: dnsServers) { success in
+          result(success)
+        }
+      } else {
+        result(FlutterMethodNotImplemented)
+      }
+    }
+
     deviceChannel.setMethodCallHandler { call, result in
       if call.method == "listDevices" {
         #if targetEnvironment(simulator)
@@ -24,6 +47,52 @@ import UIKit
         result(FlutterMethodNotImplemented)
       }
     }
+
+    hotspotChannel.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+      switch call.method {
+      case "startHotspot", "stopHotspot", "setHotspotName":
+        result(FlutterError(code: "UNIMPLEMENTED", message: "Hotspot control is not available on iOS. See docs/mobile_hotspot_native.md.", details: nil))
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
+
+    GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  /// Helper to configure an on-demand NETunnelProviderManager for DNS filtering.
+  /// Requires a NETunnelProvider extension target and matching `providerBundleIdentifier`.
+  private func setupDNSVPN(dnsServers: [String]?, completion: @escaping (Bool) -> Void) {
+    let manager = NETunnelProviderManager()
+    let protocolConfig = NETunnelProviderProtocol()
+    protocolConfig.serverAddress = "PocketFence DNS"
+    protocolConfig.providerBundleIdentifier = "com.example.pocketfence.tunnel" // TODO: replace with your extension bundle id
+
+    let dnsList = dnsServers ?? ["45.90.28.116", "45.90.29.116", "45.90.30.116"]
+    protocolConfig.providerConfiguration = ["dnsServers": dnsList]
+
+    let evaluateRule = NEEvaluateConnectionRule(matchDomains: ["*"], andAction: .connectIfNeeded)
+    let onDemandRule = NEOnDemandRuleEvaluateConnection(connectionRules: [evaluateRule], interfaceTypeMatch: .any)
+    manager.onDemandRules = [onDemandRule]
+    manager.isOnDemandEnabled = true
+    manager.isEnabled = true
+    manager.localizedDescription = "PocketFence DNS Filter"
+
+    manager.saveToPreferences { error in
+      if let error = error {
+        NSLog("NETunnelProviderManager.saveToPreferences failed: \(error.localizedDescription)")
+        NSLog("Possible causes: missing Network Extension entitlement, mismatched providerBundleIdentifier, or invalid provisioning profile.")
+        completion(false)
+        return
+      }
+      do {
+        try manager.loadFromPreferences()
+        completion(true)
+      } catch {
+        NSLog("Failed to load NETunnelProviderManager preferences after save: \(error)")
+        completion(false)
+      }
+    }
   }
 }
