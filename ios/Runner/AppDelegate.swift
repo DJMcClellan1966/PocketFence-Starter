@@ -1,4 +1,4 @@
-import Flutter
+﻿import Flutter
 import NetworkExtension
 import UIKit
 
@@ -12,7 +12,7 @@ import UIKit
       return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 
-    // VPN channel — sets up an on-demand DNS/VPN tunnel using NetworkExtension.
+    // VPN channel  sets up an on-demand DNS/VPN tunnel using NetworkExtension.
     let vpnChannel = FlutterMethodChannel(name: "pocketfence.vpn", binaryMessenger: controller.binaryMessenger)
 
     // Device discovery channel: return simulated list on simulator or empty on device
@@ -31,7 +31,7 @@ import UIKit
         }
 
       case "getDNS":
-        sendProviderMessageToExtension(["cmd": "getDNS"]) { (data, error) in
+        self.sendProviderMessageToExtension(["cmd": "getDNS"]) { (data, error) in
           if let error = error {
             result(FlutterError(code: "ERR", message: "sendProviderMessage failed: \(error.localizedDescription)", details: nil))
             return
@@ -47,7 +47,7 @@ import UIKit
       case "setDNS":
         let args = call.arguments as? [String: Any]
         let dns = args?["dnsServers"] as? [String] ?? []
-        sendProviderMessageToExtension(["cmd": "setDNS", "dnsServers": dns]) { (data, error) in
+        self.sendProviderMessageToExtension(["cmd": "setDNS", "dnsServers": dns]) { (data, error) in
           if let error = error {
             result(FlutterError(code: "ERR", message: "sendProviderMessage failed: \(error.localizedDescription)", details: nil))
             return
@@ -104,7 +104,7 @@ import UIKit
     protocolConfig.providerConfiguration = ["dnsServers": dnsList]
 
     let evaluateRule = NEEvaluateConnectionRule(matchDomains: ["*"], andAction: .connectIfNeeded)
-    let onDemandRule = NEOnDemandRuleEvaluateConnection(connectionRules: [evaluateRule], interfaceTypeMatch: .any)
+    let onDemandRule = NEOnDemandRuleEvaluateConnection(connectionRules: [evaluateRule], interfaceTypeMatch: NEOnDemandRuleInterfaceType.any)
     manager.onDemandRules = [onDemandRule]
     manager.isOnDemandEnabled = true
     manager.isEnabled = true
@@ -151,8 +151,12 @@ import UIKit
         return
       }
 
-      connection.sendProviderMessage(data) { responseData in
-        completion(responseData, nil)
+      if let session = connection as? NETunnelProviderSession {
+        session.sendProviderMessage(data) { responseData in
+          completion(responseData, nil)
+        }
+      } else {
+        completion(nil, NSError(domain: "AppDelegate", code: 4, userInfo: [NSLocalizedDescriptionKey: "Connection is not a NETunnelProviderSession"]))
       }
     }
   }
