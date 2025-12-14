@@ -14,6 +14,7 @@ dependencies:
   http: ^1.1.0  # NextDNS API
   url_launcher: ^6.2.2  # For opening Settings (iOS/Android)
   permission_handler: ^12.0.1
+  multicast_dns: ^0.3.3
   # iOS VPN/DNS: Use a package like 'flutter_vpn' or implement via channels
   # For now, simulate with url_launcher for Settings
 

@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'mdns_discovery.dart';
 
 class DeviceDiscovery {
   static const MethodChannel _channel = MethodChannel('pocketfence.devices');
@@ -6,17 +7,38 @@ class DeviceDiscovery {
   /// Returns a list of discovered devices. Each device is a Map<String, dynamic>
   /// with keys: `ip`, `mac`, `name`, `platform`.
   static Future<List<Map<String, dynamic>>> listDevices() async {
+    final List<Map<String, dynamic>> results = [];
+    // First, try mDNS discovery (cross-platform)
+    try {
+      final mdns = await MDnsDiscovery.discover();
+      for (var m in mdns) {
+        results.add(Map<String, dynamic>.from(m));
+      }
+    } catch (_) {}
+
+    // Then, ask the platform native layer (ARP parsing / platform-specific)
     try {
       final res = await _channel.invokeMethod('listDevices');
       if (res is List) {
-        return res.map<Map<String, dynamic>>((e) {
-          if (e is Map) return Map<String, dynamic>.from(e);
-          return <String, dynamic>{};
-        }).toList();
+        for (var e in res) {
+          if (e is Map) results.add(Map<String, dynamic>.from(e));
+        }
       }
     } on PlatformException {
-      return <Map<String, dynamic>>[];
+      // ignore
     }
-    return <Map<String, dynamic>>[];
+
+    // Deduplicate by ip/mac
+    final seen = <String>{};
+    final deduped = <Map<String, dynamic>>[];
+    for (var d in results) {
+      final key = (d['mac'] ?? d['ip'] ?? d['name'] ?? '').toString();
+      if (key.isEmpty) continue;
+      if (!seen.contains(key)) {
+        seen.add(key);
+        deduped.add(d);
+      }
+    }
+    return deduped;
   }
 }
