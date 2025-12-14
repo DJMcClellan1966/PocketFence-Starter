@@ -5,8 +5,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'nextdns.dart';
+import 'hotspot_service.dart';
 
-const MethodChannel _channel = MethodChannel('pocketfence.hotspot');
+
 
 Future<void> main() async {
 	WidgetsFlutterBinding.ensureInitialized();
@@ -109,11 +110,11 @@ class _MyAppState extends State<MyApp> {
 				await prefs.setString('hotspot_ssid', _ssidController.text);
 				await prefs.setBool('hotspot_block', _blockOthers);
 
-				await _channel.invokeMethod<Map>('startHotspot', {
-					'ssid': _ssidController.text,
-					'blockOthers': _blockOthers,
-					'dnsServers': nextDnsServers,
-				});
+								await HotspotService.startHotspot(
+									clientName: _ssidController.text,
+									blockOthers: _blockOthers,
+									dnsServers: nextDnsServers,
+								);
 
 				if (!mounted) return;
 				setState(() {
@@ -133,7 +134,7 @@ class _MyAppState extends State<MyApp> {
 		setState(() => _status = 'stopping');
 		if (Platform.isAndroid || Platform.isIOS) {
 			try {
-				await _channel.invokeMethod('stopHotspot');
+				await HotspotService.stopHotspot();
 				if (!mounted) return;
 				setState(() {
 					_hotspotRunning = false;

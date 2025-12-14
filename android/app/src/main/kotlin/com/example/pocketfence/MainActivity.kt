@@ -1,6 +1,5 @@
 package com.example.pocketfence
-	}
-}
+
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -191,12 +190,5 @@ class MainActivity : FlutterActivity() {
 			product == "sdk" || product == "google_sdk" || product.contains("sdk_gphone") ||
 			manufacturer.contains("Genymotion")
 	}
-}
-		val product = Build.PRODUCT ?: ""
-		val manufacturer = Build.MANUFACTURER ?: ""
-		return fingerprint.startsWith("generic") || fingerprint.startsWith("unknown") ||
-			model.contains("google_sdk") || model.contains("Emulator") || model.contains("Android SDK built for x86") ||
-			product == "sdk" || product == "google_sdk" || product.contains("sdk_gphone") ||
-			manufacturer.contains("Genymotion")
 	}
 }
