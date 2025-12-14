@@ -97,12 +97,11 @@ class MainActivity : FlutterActivity() {
 				ActivityCompat.requestPermissions(this, toRequest.toTypedArray(), REQ_NEARBY)
 				return
 			}
+		}
 
 		startLocalOnlyHotspotInternal(requestedName, blockOthers, dnsServers, result)
 	}
-
-	/**
-	 * Internal hotspot starter. Calls WifiManager.startLocalOnlyHotspot and
+	}
 	 * returns the SSID/password via the provided MethodChannel.Result.
 	 */
 	private fun startLocalOnlyHotspotInternal(requestedName: String, blockOthers: Boolean, dnsServers: List<String>?, result: MethodChannel.Result) {
