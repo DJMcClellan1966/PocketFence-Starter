@@ -1,6 +1,9 @@
 package com.example.pocketfence
 
 import android.os.Build
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -68,7 +71,7 @@ class MainActivity : FlutterActivity() {
 		// If running on an emulator, skip the NEARBY_DEVICES runtime check (emulators often cannot grant it)
 		if (isProbablyEmulator()) {
 			Log.w("PocketFence", "Emulator detected — skipping NEARBY/BLUETOOTH runtime checks for testing")
-			startLocalOnlyHotspotInternal(requestedName, blockOthers, result)
+			startLocalOnlyHotspotInternal(requestedName, blockOthers, dnsServers, result)
 			return
 		}
 
@@ -94,7 +97,6 @@ class MainActivity : FlutterActivity() {
 				ActivityCompat.requestPermissions(this, toRequest.toTypedArray(), REQ_NEARBY)
 				return
 			}
-		}
 
 		startLocalOnlyHotspotInternal(requestedName, blockOthers, dnsServers, result)
 	}
