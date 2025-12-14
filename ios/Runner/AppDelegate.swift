@@ -22,13 +22,44 @@ import UIKit
     let hotspotChannel = FlutterMethodChannel(name: "pocketfence.hotspot", binaryMessenger: controller.binaryMessenger)
 
     vpnChannel.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
-      if call.method == "setupVPN" {
+      switch call.method {
+      case "setupVPN":
         let args = call.arguments as? [String: Any]
         let dnsServers = args? ["dnsServers"] as? [String]
         self.setupDNSVPN(dnsServers: dnsServers) { success in
           result(success)
         }
-      } else {
+
+      case "getDNS":
+        sendProviderMessageToExtension(["cmd": "getDNS"]) { (data, error) in
+          if let error = error {
+            result(FlutterError(code: "ERR", message: "sendProviderMessage failed: \(error.localizedDescription)", details: nil))
+            return
+          }
+          guard let data = data else { result(nil); return }
+          if let obj = try? JSONSerialization.jsonObject(with: data, options: []), let dict = obj as? [String: Any] {
+            result(dict)
+            return
+          }
+          result(nil)
+        }
+
+      case "setDNS":
+        let args = call.arguments as? [String: Any]
+        let dns = args?["dnsServers"] as? [String] ?? []
+        sendProviderMessageToExtension(["cmd": "setDNS", "dnsServers": dns]) { (data, error) in
+          if let error = error {
+            result(FlutterError(code: "ERR", message: "sendProviderMessage failed: \(error.localizedDescription)", details: nil))
+            return
+          }
+          if let data = data, let obj = try? JSONSerialization.jsonObject(with: data, options: []), let dict = obj as? [String: Any] {
+            result(dict)
+            return
+          }
+          result(nil)
+        }
+
+      default:
         result(FlutterMethodNotImplemented)
       }
     }
@@ -92,6 +123,36 @@ import UIKit
       } catch {
         NSLog("Failed to load NETunnelProviderManager preferences after save: \(error)")
         completion(false)
+      }
+    }
+  }
+
+  /// Helper to send JSON provider messages to the NETunnelProvider extension.
+  /// The extension must be running/connected; this loads saved managers and uses the first NETunnelProviderManager found.
+  private func sendProviderMessageToExtension(_ json: [String: Any], completion: @escaping (Data?, Error?) -> Void) {
+    guard let data = try? JSONSerialization.data(withJSONObject: json, options: []) else {
+      completion(nil, NSError(domain: "AppDelegate", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid JSON payload"]))
+      return
+    }
+
+    NETunnelProviderManager.loadAllFromPreferences { managers, error in
+      if let error = error {
+        completion(nil, error)
+        return
+      }
+
+      guard let managers = managers, let manager = managers.first(where: { $0.protocolConfiguration is NETunnelProviderProtocol }) else {
+        completion(nil, NSError(domain: "AppDelegate", code: 2, userInfo: [NSLocalizedDescriptionKey: "No NETunnelProviderManager found"]))
+        return
+      }
+
+      guard let connection = manager.connection else {
+        completion(nil, NSError(domain: "AppDelegate", code: 3, userInfo: [NSLocalizedDescriptionKey: "NETunnelProvider connection is not available"]))
+        return
+      }
+
+      connection.sendProviderMessage(data) { responseData in
+        completion(responseData, nil)
       }
     }
   }

@@ -8,7 +8,7 @@ Usage (run as Admin):
 param(
     [switch]$RunFlutter
 )
-function Require-Admin {
+function Test-Administrator {
     $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
     if (-not $isAdmin) {
         Write-Error "This script must be run as Administrator. Right-click PowerShell and choose 'Run as administrator'."
@@ -60,10 +60,10 @@ function Install-BuildTools {
     foreach ($w in $workloads) { $addArgs += "--add"; $addArgs += $w }
     foreach ($c in $components) { $addArgs += "--add"; $addArgs += $c }
 
-    $args = @('--quiet','--wait','--norestart','--includeRecommended') + $addArgs + @('--log', "$env:TEMP\vs_buildtools_install.log")
+    $installerArgs = @('--quiet','--wait','--norestart','--includeRecommended') + $addArgs + @('--log', "$env:TEMP\vs_buildtools_install.log")
     Write-Host "Running build tools installer (this may take a while)..."
     try {
-        $p = Start-Process -FilePath $Dest -ArgumentList $args -Wait -PassThru -NoNewWindow
+        $p = Start-Process -FilePath $Dest -ArgumentList $installerArgs -Wait -PassThru -NoNewWindow
         if ($p.ExitCode -ne 0) {
             Write-Warning "Installer exited with code $($p.ExitCode). Check $env:TEMP\vs_buildtools_install.log for details."
             return $false
@@ -76,7 +76,7 @@ function Install-BuildTools {
     return $true
 }
 
-function Run-FlutterBuild {
+function Invoke-FlutterBuild {
     Write-Host "Running 'flutter doctor' then 'flutter build windows'..."
     try {
         & flutter doctor
@@ -87,7 +87,7 @@ function Run-FlutterBuild {
 }
 
 # --- main
-Require-Admin
+Test-Administrator
 Enable-DeveloperMode
 $installed = Install-BuildTools
 if (-not $installed) {
@@ -99,7 +99,7 @@ if (-not $installed) {
 Write-Host "Finished setup. If you installed or modified Visual Studio components, a reboot may be required."
 
 if ($RunFlutter) {
-    Run-FlutterBuild
+    Invoke-FlutterBuild
 }
 
 Write-Host "Script complete."

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
+import 'nextdns.dart';
 
 const MethodChannel _channel = MethodChannel('pocketfence.hotspot');
 
@@ -111,6 +112,7 @@ class _MyAppState extends State<MyApp> {
         await _channel.invokeMethod<Map>('startHotspot', {
           'ssid': _ssidController.text,
           'blockOthers': _blockOthers,
+          'dnsServers': nextDnsServers,
         });
 
         if (!mounted) return;

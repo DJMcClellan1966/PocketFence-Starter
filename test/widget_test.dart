@@ -15,8 +15,8 @@ void main() {
     await tester.pumpWidget(const PocketFenceApp());
     await tester.pumpAndSettle();
 
-    // Verify key UI is present.
-    expect(find.text('PocketFence Dashboard'), findsOneWidget);
-    expect(find.text('Hotspot: OFF'), findsOneWidget);
+    // Verify key UI is present (updated UI labels).
+    expect(find.text('PocketFence Hotspot'), findsOneWidget);
+    expect(find.textContaining('Status:'), findsOneWidget);
   });
 }

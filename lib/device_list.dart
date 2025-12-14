@@ -58,7 +58,11 @@ class _DeviceListPageState extends State<DeviceListPage> {
                       subtitle: Text('IP: ${d['ip'] ?? '-'}  MAC: ${d['mac'] ?? '-'}'),
                       trailing: Checkbox(value: selected, onChanged: (v) {
                         setState(() {
-                          if (v == true) _selected.add(id); else _selected.remove(id);
+                          if (v == true) {
+                            _selected.add(id);
+                          } else {
+                            _selected.remove(id);
+                          }
                         });
                       }),
                     );

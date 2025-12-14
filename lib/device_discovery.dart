@@ -4,7 +4,7 @@ import 'mdns_discovery.dart';
 class DeviceDiscovery {
   static const MethodChannel _channel = MethodChannel('pocketfence.devices');
 
-  /// Returns a list of discovered devices. Each device is a Map<String, dynamic>
+  /// Returns a list of discovered devices. Each device is a Map&lt;String, dynamic&gt;
   /// with keys: `ip`, `mac`, `name`, `platform`.
   static Future<List<Map<String, dynamic>>> listDevices() async {
     final List<Map<String, dynamic>> results = [];

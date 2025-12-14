@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'nextdns.dart';
 import 'hotspot_service.dart';
 import 'device_list.dart';
+import 'vpn_helper.dart';
 
 
 
@@ -188,6 +189,14 @@ class _MyAppState extends State<MyApp> {
 										}, child: const Text('Manage Devices')),
 									],
 								),
+								const SizedBox(height: 12),
+								Row(
+									children: [
+										ElevatedButton(onPressed: _getDNS, child: const Text('Get DNS')),
+										const SizedBox(width: 12),
+										ElevatedButton(onPressed: _setDNS, child: const Text('Set DNS')),
+									],
+								),
 								const SizedBox(height: 20),
 								Text('Status: $_status'),
 								const SizedBox(height: 12),
@@ -202,5 +211,41 @@ class _MyAppState extends State<MyApp> {
 				),
 			),
 		);
+	}
+
+	Future<void> _getDNS() async {
+		setState(() => _status = 'querying dns');
+		final dns = await VpnHelper.getDNS();
+		if (!mounted) return;
+		await showDialog<void>(context: context, builder: (ctx) => AlertDialog(
+			title: const Text('Current DNS'),
+			content: Text(dns == null ? 'unavailable' : dns.join(', ')),
+			actions: [TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('OK'))],
+		));
+		setState(() => _status = dns == null ? 'dns unavailable' : 'dns: ${dns.join(', ')}');
+	}
+
+	Future<void> _setDNS() async {
+		final controller = TextEditingController();
+		final ok = await showDialog<bool?>(context: context, builder: (ctx) => AlertDialog(
+			title: const Text('Set DNS Servers'),
+			content: TextField(controller: controller, decoration: const InputDecoration(hintText: 'Comma-separated IPs')),
+			actions: [
+				TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+				TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Set')),
+			],
+		));
+		if (ok != true) return;
+		final text = controller.text.trim();
+		final list = text.isEmpty ? <String>[] : text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+		setState(() => _status = 'setting dns');
+		final success = await VpnHelper.setDNS(list);
+		if (!mounted) return;
+		setState(() => _status = success ? 'dns set' : 'dns set failed');
+		await showDialog<void>(context: context, builder: (ctx) => AlertDialog(
+			title: Text(success ? 'Success' : 'Failed'),
+			content: Text(success ? 'DNS updated' : 'Failed to update DNS'),
+			actions: [TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('OK'))],
+		));
 	}
 }
