@@ -1,4 +1,4 @@
-// Use Bconditional import so editors that index the app target don't error
+// Use conditional import so editors that index the app target don't error
 #if canImport(NetworkExtension)
 import NetworkExtension
 #endif

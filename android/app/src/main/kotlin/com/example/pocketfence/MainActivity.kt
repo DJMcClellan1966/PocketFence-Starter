@@ -1,9 +1,6 @@
 package com.example.pocketfence
-package com.example.pocketfence
-
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
+	}
+}
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
