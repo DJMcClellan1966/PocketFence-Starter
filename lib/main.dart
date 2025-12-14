@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'nextdns.dart';
 import 'hotspot_service.dart';
+import 'device_list.dart';
 
 
 
@@ -176,6 +177,15 @@ class _MyAppState extends State<MyApp> {
 										ElevatedButton(onPressed: _hotspotRunning ? null : _startHotspot, child: const Text('Start')),
 										const SizedBox(width: 12),
 										ElevatedButton(onPressed: _hotspotRunning ? _stopHotspot : null, child: const Text('Stop')),
+										const SizedBox(width: 12),
+										ElevatedButton(onPressed: () async {
+											final selected = await Navigator.of(context).push<List<String?>>(MaterialPageRoute(builder: (_) => const DeviceListPage()));
+											if (selected != null) {
+												// store selection or use it for filtering/controls
+												// For now just show a short status update
+												setState(() { _status = 'selected ${selected.length} devices'; });
+											}
+										}, child: const Text('Manage Devices')),
 									],
 								),
 								const SizedBox(height: 20),

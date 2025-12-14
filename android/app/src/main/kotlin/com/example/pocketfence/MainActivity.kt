@@ -46,6 +46,53 @@ class MainActivity : FlutterActivity() {
 				else -> result.notImplemented()
 			}
 		}
+
+		// Device discovery channel: list devices on local network / ARP table
+		MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "pocketfence.devices").setMethodCallHandler { call, result ->
+			when (call.method) {
+				"listDevices" -> {
+					try {
+						val list = ArrayList<Map<String, String>>()
+						// On emulators, return mocked devices for testing
+						if (isProbablyEmulator()) {
+							val m1: MutableMap<String, String> = HashMap()
+							m1["ip"] = "10.0.2.2"
+							m1["mac"] = "02:00:00:00:00:02"
+							m1["name"] = "Android Emulator"
+							m1["platform"] = "android"
+							list.add(m1)
+							result.success(list)
+							return@setMethodCallHandler
+						}
+						try {
+							val arp = java.io.File("/proc/net/arp")
+							if (arp.exists()) {
+								val lines = arp.readLines()
+								for (i in 1 until lines.size) {
+									val parts = lines[i].split(Regex("\\s+"))
+									if (parts.size >= 4) {
+										val ip = parts[0]
+										val mac = parts[3]
+										val entry: MutableMap<String, String> = HashMap()
+										entry["ip"] = ip
+										entry["mac"] = mac
+										entry["name"] = ip
+										entry["platform"] = "unknown"
+										list.add(entry)
+									}
+								}
+							}
+						} catch (e: Exception) {
+							// ignore and return what we have
+						}
+						result.success(list)
+					} catch (e: Exception) {
+						result.error("ERR", "Failed to list devices: ${e.message}", null)
+					}
+				}
+				else -> result.notImplemented()
+			}
+		}
 	}
 
 	/**
@@ -189,4 +236,4 @@ class MainActivity : FlutterActivity() {
 				manufacturer.contains("Genymotion")
 	}
 }
-		val manufacturer = Build.MANUFACTURER ?: ""
+
