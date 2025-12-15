@@ -104,7 +104,10 @@ import UIKit
     protocolConfig.providerConfiguration = ["dnsServers": dnsList]
 
     let evaluateRule = NEEvaluateConnectionRule(matchDomains: ["*"], andAction: .connectIfNeeded)
-    let onDemandRule = NEOnDemandRuleEvaluateConnection(connectionRules: [evaluateRule], interfaceTypeMatch: NEOnDemandRuleInterfaceType.any)
+    evaluateRule.action = .connectIfNeeded
+    let onDemandRule = NEOnDemandRuleEvaluateConnection()
+    onDemandRule.connectionRules = [evaluateRule]
+    onDemandRule.interfaceTypeMatch = .any
     manager.onDemandRules = [onDemandRule]
     manager.isOnDemandEnabled = true
     manager.isEnabled = true
@@ -146,13 +149,10 @@ import UIKit
         return
       }
 
-      guard let connection = manager.connection else {
-        completion(nil, NSError(domain: "AppDelegate", code: 3, userInfo: [NSLocalizedDescriptionKey: "NETunnelProvider connection is not available"]))
-        return
-      }
+      let connection = manager.connection
 
       if let session = connection as? NETunnelProviderSession {
-        session.sendProviderMessage(data) { responseData in
+        try? session.sendProviderMessage(data) { responseData in
           completion(responseData, nil)
         }
       } else {
