@@ -49,4 +49,4 @@ jobs:
           LC_ALL: en_US.UTF-8
         run: |
           set -o pipefail
-          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 14' test | xcpretty --no-color
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation)' test | xcpretty --no-color
