@@ -119,12 +119,14 @@ import UIKit
         completion(false)
         return
       }
-      do {
-        try manager.loadFromPreferences()
-        completion(true)
-      } catch {
-        NSLog("Failed to load NETunnelProviderManager preferences after save: \(error)")
-        completion(false)
+      Task {
+        do {
+          try await manager.loadFromPreferences()
+          completion(true)
+        } catch {
+          NSLog("Failed to load NETunnelProviderManager preferences after save: \(error)")
+          completion(false)
+        }
       }
     }
   }
