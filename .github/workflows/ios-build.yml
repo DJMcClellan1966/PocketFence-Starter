@@ -19,7 +19,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          flutter-version: '3.38.0'
 
       - name: Install gems (xcpretty, cocoapods)
         run: |
@@ -49,4 +49,4 @@ jobs:
           LC_ALL: en_US.UTF-8
         run: |
           set -o pipefail
-          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 14' test | xcpretty --no-color
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation)' test | xcpretty --no-color

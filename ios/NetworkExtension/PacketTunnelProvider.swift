@@ -1,75 +1,100 @@
 // Use conditional import so editors that index the app target don't error
 #if canImport(NetworkExtension)
 import NetworkExtension
-#endif
 
-// IMPORTANT: Target membership and framework note
-// - Ensure this file is included ONLY in your Network Extension target (Packet Tunnel) in Xcode.
-//   If `PacketTunnelProvider.swift` is a member of the main app target, SourceKit/Xcode will attempt
-//   to compile it for the app target and you'll see errors like "no such module 'NetworkExtension'".
-// - In Xcode: select the file -> File Inspector -> Target Membership -> check only the extension target.
-// - Also ensure the Network Extension target links `NetworkExtension.framework` (Build Phases -> Link Binary With Libraries).
-// - After changing target membership, clean the build folder and rebuild the extension target to refresh the index.
-//
-// Minimal Packet Tunnel Provider scaffold for NETunnelProvider extension.
-// Add this file to your Network Extension target (Packet Tunnel) in Xcode.
-// Configure the extension's bundle identifier and set `providerBundleIdentifier` in AppDelegate.swift.
+// IMPORTANT: Include this file only in the Network Extension (Packet Tunnel) target.
+// - In Xcode: File Inspector -> Target Membership -> select only the extension target.
+// - Link NetworkExtension.framework in the extension target (Build Phases -> Link Binary With Libraries).
+// - Ensure entitlements/provisioning are configured for Network Extension capability.
 
-#if canImport(NetworkExtension)
-
+/// Minimal PacketTunnelProvider scaffold with basic DNS handling and AppMessage commands.
 class PacketTunnelProvider: NEPacketTunnelProvider {
 
-    // Called when the system starts the tunnel extension
-    override func startTunnel(options: [String : NSObject]?, completionHandler: @escaping (Error?) -> Void) {
-        // Example: Configure VPN/DNS settings here.
-        // This scaffold doesn't create a real tunnel; it's a template for implementers.
-
-        // Create a basic tunnel network settings example (adjust as needed):
-        let settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress: "127.0.0.1")
-
-        // Determine DNS servers from providerConfiguration (set by the host app) or fall back to defaults
-        var dnsServers: [String] = ["45.90.28.116", "45.90.30.116"]
+    // Gracefully parse DNS list from providerConfiguration.
+    private func dnsListFromConfiguration() -> [String] {
         if let cfg = self.protocolConfiguration?.providerConfiguration as? [String: Any],
            let provided = cfg["dnsServers"] as? [String],
            provided.count > 0 {
-            dnsServers = provided
+            return provided
         }
+        return ["45.90.28.116", "45.90.29.116", "45.90.30.116"]
+    }
+
+    // Called when the system starts the tunnel extension
+    override func startTunnel(options: [String : NSObject]?, completionHandler: @escaping (Error?) -> Void) {
+        NSLog("PacketTunnelProvider: startTunnel called")
+
+        let settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress: "127.0.0.1")
+
+        let dnsServers = dnsListFromConfiguration()
+        NSLog("PacketTunnelProvider: applying DNS servers: \(dnsServers)")
+
         let dnsSettings = NEDNSSettings(servers: dnsServers)
         settings.dnsSettings = dnsSettings
 
-        // Example IP settings: for a real tunnel, configure IP addressing and routes
-        // settings.ipv4Settings = NEIPv4Settings(addresses: ["10.0.0.2"], subnetMasks: ["255.255.255.0"]) 
-
-        setTunnelNetworkSettings(settings) { [weak self] error in
+        // NOTE: For a functional packet tunnel, configure IP addressing and routes here.
+        setTunnelNetworkSettings(settings) { error in
             if let error = error {
-                // Failed to set settings — report to host app
+                NSLog("PacketTunnelProvider: failed to set tunnel settings: \(error)")
                 completionHandler(error)
                 return
             }
-
-            // Start reading/writing packets via packetFlow if building a real tunnel
-            // For example, setup sockets or tun interfaces here and call completionHandler(nil) on success
-
-            // This example completes immediately without a real tunnel
+            NSLog("PacketTunnelProvider: tunnel network settings applied")
             completionHandler(nil)
-
-            // Optionally, send a message to the host app
-            // self?.handleAppMessage(["status": "started"] as [String : Any]) { _ in }
         }
     }
 
     // Called when the system stops the tunnel extension
     override func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
-        // Clean up sockets/tunnel resources here
-
-        // Indicate the tunnel has been stopped
+        NSLog("PacketTunnelProvider: stopTunnel called, reason: \(reason)")
+        // Tear down sockets or resources here
         completionHandler()
     }
 
-    // Handle messages from the containing app
+    // Handle messages sent from the host app via sendProviderMessage
+    // Expected JSON payloads (UTF-8 encoded):
+    // - { "cmd": "getDNS" }
+    // - { "cmd": "setDNS", "dnsServers": ["1.2.3.4"] }
     override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)?) {
-        // Decode messageData and respond if needed
-        completionHandler?(nil)
+        guard let json = try? JSONSerialization.jsonObject(with: messageData, options: []),
+              let dict = json as? [String: Any],
+              let cmd = dict["cmd"] as? String else {
+            NSLog("PacketTunnelProvider: handleAppMessage - invalid message")
+            completionHandler?(nil)
+            return
+        }
+
+        switch cmd {
+        case "getDNS":
+            let dns = dnsListFromConfiguration()
+            let resp: [String: Any] = ["dnsServers": dns]
+            if let data = try? JSONSerialization.data(withJSONObject: resp, options: []) {
+                completionHandler?(data)
+            } else {
+                completionHandler?(nil)
+            }
+
+        case "setDNS":
+            if let newDns = dict["dnsServers"] as? [String], newDns.count > 0 {
+                // Update providerConfiguration so future startTunnel sees the new DNS list.
+                if var proto = self.protocolConfiguration as? NETunnelProviderProtocol {
+                    var cfg = proto.providerConfiguration ?? [:]
+                    cfg["dnsServers"] = newDns
+                    proto.providerConfiguration = cfg
+                    self.protocolConfiguration = proto
+                    NSLog("PacketTunnelProvider: providerConfiguration updated with new DNS: \(newDns)")
+                }
+                let resp: [String: Any] = ["result": "ok"]
+                completionHandler?(try? JSONSerialization.data(withJSONObject: resp, options: []))
+            } else {
+                let resp: [String: Any] = ["error": "invalid dnsServers"]
+                completionHandler?(try? JSONSerialization.data(withJSONObject: resp, options: []))
+            }
+
+        default:
+            NSLog("PacketTunnelProvider: handleAppMessage - unknown cmd: \(cmd)")
+            completionHandler?(nil)
+        }
     }
 
     // Example helper: send status back to host app
@@ -77,7 +102,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         if let msg = try? JSONSerialization.data(withJSONObject: info, options: []) {
             self.sendProviderMessage(msg) { error in
                 if let error = error {
-                    // handle error
                     NSLog("PacketTunnelProvider: sendProviderMessage error: \(error)")
                 }
             }
