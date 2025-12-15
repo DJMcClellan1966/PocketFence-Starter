@@ -104,7 +104,6 @@ import UIKit
     protocolConfig.providerConfiguration = ["dnsServers": dnsList]
 
     let evaluateRule = NEEvaluateConnectionRule(matchDomains: ["*"], andAction: .connectIfNeeded)
-    evaluateRule.action = .connectIfNeeded
     let onDemandRule = NEOnDemandRuleEvaluateConnection()
     onDemandRule.connectionRules = [evaluateRule]
     onDemandRule.interfaceTypeMatch = .any
