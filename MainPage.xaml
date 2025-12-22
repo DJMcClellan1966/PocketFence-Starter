@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PocketFence.MainPage"
+             Title="PocketFence - AI-Powered Network Manager"
+             BackgroundColor="{StaticResource Light}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="20">
+            
+            <!-- Header -->
+            <Frame BackgroundColor="{StaticResource Primary}" HasShadow="True" CornerRadius="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    
+                    <Label Grid.Row="0"
+                           Text="🛡️ PocketFence"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource White}"
+                           HorizontalOptions="Center" />
+                           
+                    <Label Grid.Row="1"
+                           Text="AI-Powered Family Network Guardian"
+                           FontSize="16"
+                           TextColor="{StaticResource White}"
+                           HorizontalOptions="Center"
+                           Opacity="0.8" />
+                </Grid>
+            </Frame>
+
+            <!-- Hotspot Configuration -->
+            <Frame BackgroundColor="{StaticResource White}" HasShadow="True" CornerRadius="15">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="📶 Hotspot Configuration"
+                           Style="{StaticResource SubHeaderLabel}" />
+                    
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <Label Grid.Row="0" Grid.Column="0"
+                               Text="Network Name:"
+                               VerticalOptions="Center"
+                               Margin="0,0,10,0" />
+                        <Entry Grid.Row="0" Grid.Column="1"
+                               x:Name="SSIDEntry"
+                               Placeholder="Enter network name"
+                               Text="MyPocketFence" />
+                        
+                        <CheckBox Grid.Row="1" Grid.Column="0"
+                                  x:Name="BlockOthersCheckBox"
+                                  VerticalOptions="Center" />
+                        <Label Grid.Row="1" Grid.Column="1"
+                               Text="🚫 Block unauthorized devices"
+                               VerticalOptions="Center" />
+                    </Grid>
+                    
+                    <!-- Action Buttons -->
+                    <Grid Margin="0,20,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <Button Grid.Column="0"
+                                x:Name="ToggleButton"
+                                Text="Start Hotspot"
+                                Style="{StaticResource PrimaryButton}"
+                                Clicked="OnToggleHotspotClicked"
+                                Margin="0,0,5,0" />
+                        
+                        <Button Grid.Column="1"
+                                Text="📱 Devices"
+                                BackgroundColor="{StaticResource Gray600}"
+                                TextColor="{StaticResource White}"
+                                Clicked="OnViewDevicesClicked"
+                                Margin="5,0,5,0" />
+                        
+                        <Button Grid.Column="2"
+                                Text="🤖 AI Controls"
+                                Style="{StaticResource AIButton}"
+                                Clicked="OnAIControlsClicked"
+                                Margin="5,0,0,0" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- DNS Configuration -->
+            <Frame BackgroundColor="{StaticResource White}" HasShadow="True" CornerRadius="15">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="🌐 DNS Security Settings"
+                           Style="{StaticResource SubHeaderLabel}" />
+                    
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <Picker Grid.Row="0" Grid.Column="0"
+                                x:Name="DNSPicker"
+                                Title="Select DNS Provider"
+                                SelectedIndex="0">
+                            <Picker.Items>
+                                <x:String>Default DNS (Google)</x:String>
+                                <x:String>NextDNS (Family Safe)</x:String>
+                            </Picker.Items>
+                        </Picker>
+                        
+                        <Button Grid.Row="0" Grid.Column="1"
+                                Text="Apply"
+                                BackgroundColor="{StaticResource Success}"
+                                TextColor="{StaticResource White}"
+                                Clicked="OnApplyDnsClicked"
+                                Margin="10,0,0,0"
+                                WidthRequest="80" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Quick Actions (Mobile optimized) -->
+            <Frame BackgroundColor="{StaticResource White}" HasShadow="True" CornerRadius="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="⚡ Quick Actions"
+                           Style="{StaticResource SubHeaderLabel}" />
+                    
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <Button Grid.Row="0" Grid.Column="0"
+                                Text="🔧 Auto Setup"
+                                BackgroundColor="{StaticResource Info}"
+                                TextColor="{StaticResource White}"
+                                Margin="0,0,5,5" />
+                        
+                        <Button Grid.Row="0" Grid.Column="1"
+                                Text="📊 Network Stats"
+                                BackgroundColor="{StaticResource Warning}"
+                                TextColor="{StaticResource Black}"
+                                Margin="5,0,0,5" />
+                        
+                        <Button Grid.Row="1" Grid.Column="0"
+                                Text="🛡️ Security Scan"
+                                BackgroundColor="{StaticResource Danger}"
+                                TextColor="{StaticResource White}"
+                                Margin="0,5,5,0" />
+                        
+                        <Button Grid.Row="1" Grid.Column="1"
+                                Text="💡 AI Insights"
+                                BackgroundColor="{StaticResource AIAccent}"
+                                TextColor="{StaticResource White}"
+                                Margin="5,5,0,0" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Status -->
+            <Frame BackgroundColor="{StaticResource Light}" CornerRadius="10">
+                <Label x:Name="StatusLabel"
+                       Text="Status: Ready"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"
+                       HorizontalOptions="Center" />
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="PocketFence.ParentalDashboard"
+             Title="Universal Parental Control Dashboard"
+             BackgroundColor="#F5F5F5">
+
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="15">
+
+            <!-- Header Section -->
+            <Frame BackgroundColor="#2C3E50" CornerRadius="10" Padding="15">
+                <StackLayout>
+                    <Label Text="PocketFence Universal Control" 
+                           FontSize="24" 
+                           FontAttributes="Bold" 
+                           TextColor="White" 
+                           HorizontalOptions="Center" />
+                    <Label x:Name="StatusLabel" 
+                           Text="Shield All devices protected" 
+                           FontSize="16" 
+                           TextColor="#ECF0F1" 
+                           HorizontalOptions="Center" />
+                    <Label x:Name="SyncStatusLabel" 
+                           Text="Sync Last sync: Just now" 
+                           FontSize="12" 
+                           TextColor="#BDC3C7" 
+                           HorizontalOptions="Center" />
+                </StackLayout>
+            </Frame>
+
+            <!-- Quick Actions -->
+            <Frame BackgroundColor="White" CornerRadius="10" Padding="15">
+                <StackLayout>
+                    <Label Text="Quick Actions" FontSize="18" FontAttributes="Bold" TextColor="#2C3E50" />
+                    
+                    <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto" ColumnSpacing="10">
+                        <Button x:Name="EmergencyBlockButton" 
+                                Text="Emergency Block" 
+                                BackgroundColor="#E74C3C" 
+                                TextColor="White" 
+                                FontSize="12" 
+                                Clicked="OnEmergencyBlockClicked" 
+                                Grid.Column="0" />
+                        
+                        <Button x:Name="ScanDevicesButton" 
+                                Text="Scan Devices" 
+                                BackgroundColor="#3498DB" 
+                                TextColor="White" 
+                                FontSize="12" 
+                                Clicked="OnScanDevicesClicked" 
+                                Grid.Column="1" />
+                        
+                        <Button x:Name="SyncCloudButton" 
+                                Text="Sync Now" 
+                                BackgroundColor="#9B59B6" 
+                                TextColor="White" 
+                                FontSize="12" 
+                                Clicked="OnSyncCloudClicked" 
+                                Grid.Column="2" />
+                    </Grid>
+                </StackLayout>
+            </Frame>
+
+            <!-- Device Overview -->
+            <Frame BackgroundColor="White" CornerRadius="10" Padding="15">
+                <StackLayout>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <Label Text="Connected Devices" FontSize="18" FontAttributes="Bold" TextColor="#2C3E50" Grid.Column="0" />
+                        <Label x:Name="DeviceCountLabel" Text="0 devices" FontSize="14" TextColor="#7F8C8D" Grid.Column="1" />
+                    </Grid>
+                    
+                    <CollectionView x:Name="DeviceCollectionView" HeightRequest="200">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10" Padding="5">
+                                    <Label Text="{Binding DeviceIcon}" FontSize="20" Grid.Column="0" VerticalOptions="Center" />
+                                    <StackLayout Grid.Column="1" VerticalOptions="Center">
+                                        <Label Text="{Binding Name}" FontSize="14" FontAttributes="Bold" />
+                                        <Label Text="{Binding AssignedUser}" FontSize="12" TextColor="#7F8C8D" />
+                                    </StackLayout>
+                                    <Label Text="{Binding Status}" FontSize="12" TextColor="{Binding StatusColor}" Grid.Column="2" VerticalOptions="Center" />
+                                    <Switch x:Name="DeviceToggle" IsToggled="{Binding IsAllowed}" Grid.Column="3" VerticalOptions="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+            </Frame>
+
+            <!-- Loading Indicator -->
+            <ActivityIndicator x:Name="LoadingIndicator" 
+                               IsVisible="False" 
+                               IsRunning="False" 
+                               Color="#3498DB" 
+                               HeightRequest="50" />
+
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

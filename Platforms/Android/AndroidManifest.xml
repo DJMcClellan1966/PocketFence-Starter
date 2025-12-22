@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.pocketfence.app">
+	
+	<!-- Required permissions for hotspot functionality -->
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	
+	<!-- Hotspot permissions (requires system-level access) -->
+	<uses-permission android:name="android.permission.WRITE_SETTINGS" />
+	<uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+	
+	<!-- Network monitoring permissions -->
+	<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+	
+	<!-- Required for device discovery -->
+	<uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
+	
+	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:supportsRtl="true" android:label="PocketFence">
+	</application>
+	
+	<uses-feature android:name="android.hardware.wifi" android:required="true" />
+	<uses-feature android:name="android.hardware.wifi.direct" android:required="false" />
+	
+</manifest>

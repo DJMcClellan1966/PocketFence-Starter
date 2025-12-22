@@ -1,0 +1,14 @@
+<svg width="456" height="456" viewBox="0 0 456 456" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="456" height="456" rx="75" fill="#512BD4"/>
+    <g transform="translate(60, 60)">
+        <!-- WiFi Symbol -->
+        <path d="M168 126 C168 98 193 76 224 76 C255 76 280 98 280 126" stroke="white" stroke-width="8" fill="none"/>
+        <path d="M168 156 C168 142 193 131 224 131 C255 131 280 142 280 156" stroke="white" stroke-width="8" fill="none"/>
+        <path d="M168 186 C168 179 193 173 224 173 C255 173 280 179 280 186" stroke="white" stroke-width="8" fill="none"/>
+        <circle cx="224" cy="206" r="8" fill="white"/>
+        
+        <!-- Shield -->
+        <path d="M188 246 Q188 226 208 226 L240 226 Q260 226 260 246 L260 276 Q260 296 240 296 L208 296 Q188 296 188 276 Z" fill="white" stroke="none"/>
+        <text x="224" y="280" text-anchor="middle" fill="#512BD4" font-family="Arial" font-size="24" font-weight="bold">🛡️</text>
+    </g>
+</svg>

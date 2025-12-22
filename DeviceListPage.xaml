@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PocketFence.DeviceListPage"
+             Title="Connected Devices"
+             BackgroundColor="{StaticResource Light}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Frame Grid.Row="0" 
+               BackgroundColor="{StaticResource Primary}"
+               HasShadow="True"
+               CornerRadius="0,0,15,15"
+               Margin="0,0,0,10">
+            <VerticalStackLayout Spacing="5">
+                <Label Text="📱 Connected Devices"
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource White}"
+                       HorizontalOptions="Center" />
+                <Label Text="Monitor and manage network devices"
+                       FontSize="14"
+                       TextColor="{StaticResource White}"
+                       HorizontalOptions="Center"
+                       Opacity="0.8" />
+            </VerticalStackLayout>
+        </Frame>
+
+        <!-- Refresh Button -->
+        <Button Grid.Row="1"
+                x:Name="RefreshButton"
+                Text="🔄 Refresh Devices"
+                Style="{StaticResource SuccessButton}"
+                Clicked="OnRefreshClicked"
+                Margin="20,0,20,10" />
+
+        <!-- Loading Indicator -->
+        <ActivityIndicator Grid.Row="2"
+                          x:Name="LoadingIndicator"
+                          IsVisible="False"
+                          IsRunning="True"
+                          Color="{StaticResource Primary}"
+                          VerticalOptions="Center" />
+
+        <!-- Devices List -->
+        <CollectionView Grid.Row="2"
+                        x:Name="DevicesCollectionView"
+                        BackgroundColor="Transparent"
+                        SelectionMode="Single"
+                        SelectionChanged="OnDeviceSelected"
+                        Margin="20,0">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="0,5">
+                        <Frame BackgroundColor="{StaticResource White}"
+                               HasShadow="True"
+                               CornerRadius="12"
+                               Padding="15">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Device Icon -->
+                                <Label Grid.Row="0" Grid.Column="0" Grid.RowSpan="3"
+                                       Text="{Binding DeviceIcon}"
+                                       FontSize="32"
+                                       VerticalOptions="Center"
+                                       Margin="0,0,15,0" />
+
+                                <!-- Device Name -->
+                                <Label Grid.Row="0" Grid.Column="1"
+                                       Text="{Binding Name}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource Gray900}" />
+
+                                <!-- IP Address -->
+                                <Label Grid.Row="1" Grid.Column="1"
+                                       Text="{Binding IpAddress}"
+                                       FontSize="14"
+                                       TextColor="{StaticResource Gray600}" />
+
+                                <!-- Last Seen -->
+                                <Label Grid.Row="2" Grid.Column="1"
+                                       Text="{Binding LastSeen, StringFormat='Last seen: {0:HH:mm:ss}'}"
+                                       FontSize="12"
+                                       TextColor="{StaticResource Gray500}" />
+
+                                <!-- Status Indicator -->
+                                <Ellipse Grid.Row="0" Grid.Column="2"
+                                        Fill="{Binding StatusColor}"
+                                        WidthRequest="12"
+                                        HeightRequest="12"
+                                        VerticalOptions="Start" />
+                            </Grid>
+                        </Frame>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.EmptyView>
+                <ContentView>
+                    <VerticalStackLayout VerticalOptions="Center"
+                                       HorizontalOptions="Center"
+                                       Spacing="20">
+                        <Label Text="📱"
+                               FontSize="64"
+                               HorizontalOptions="Center" />
+                        <Label Text="No devices found"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource Gray600}"
+                               HorizontalOptions="Center" />
+                        <Label Text="Tap 'Refresh Devices' to scan for connected devices"
+                               FontSize="14"
+                               TextColor="{StaticResource Gray500}"
+                               HorizontalTextAlignment="Center"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </ContentView>
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+        <!-- Status -->
+        <Frame Grid.Row="3"
+               BackgroundColor="{StaticResource Light}"
+               CornerRadius="10"
+               Margin="20,10,20,20">
+            <Label x:Name="StatusLabel"
+                   Text="Ready to scan for devices"
+                   FontSize="14"
+                   TextColor="{StaticResource Primary}"
+                   HorizontalOptions="Center" />
+        </Frame>
+
+    </Grid>
+
+</ContentPage>
